@@ -1,9 +1,9 @@
 
 module debug_top
  #(parameter C_M00_AXI_DATA_WIDTH = 32
-   , parameter C_M00_AXI_ADDR_WIDTH = 32
+   , parameter C_M00_AXI_ADDR_WIDTH = 32 
    , parameter C_S00_AXI_DATA_WIDTH = 32
-   , parameter C_S00_AXI_ADDR_WIDTH = 32
+   , parameter C_S00_AXI_ADDR_WIDTH = 28
    , parameter DM_BUS_WIDTH = 32
    )
   (input wire                                    aclk

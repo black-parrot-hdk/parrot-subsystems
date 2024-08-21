@@ -1,0 +1,54 @@
+From eabe00c4f0f0909985c96aeb32cd54c02d564d4d Mon Sep 17 00:00:00 2001
+From: Dan Petrisko <petrisko@cs.washington.edu>
+Date: Wed, 21 Aug 2024 15:21:46 -0700
+Subject: [PATCH] Adding Xlen parameter (PR #83)
+
+---
+ src/dm_mem.sv | 3 ++-
+ src/dm_top.sv | 2 ++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/dm_mem.sv b/src/dm_mem.sv
+index 9ff3c86..968184b 100755
+--- a/src/dm_mem.sv
++++ b/src/dm_mem.sv
+@@ -19,6 +19,7 @@
+ module dm_mem #(
+   parameter int unsigned        NrHarts          =  1,
+   parameter int unsigned        BusWidth         = 32,
++  parameter int unsigned        Xlen             = 32,
+   parameter logic [NrHarts-1:0] SelectableHarts  = {NrHarts{1'b1}},
+   parameter int unsigned        DmBaseAddress    = '0
+ ) (
+@@ -61,7 +62,7 @@ module dm_mem #(
+   localparam int unsigned DbgAddressBits = 12;
+   localparam int unsigned HartSelLen     = (NrHarts == 1) ? 1 : $clog2(NrHarts);
+   localparam int unsigned NrHartsAligned = 2**HartSelLen;
+-  localparam int unsigned MaxAar         = (BusWidth == 64) ? 4 : 3;
++  localparam int unsigned MaxAar         = (Xlen == 64) ? 4 : 3;
+   localparam bit          HasSndScratch  = (DmBaseAddress != 0);
+   // Depending on whether we are at the zero page or not we either use `x0` or `x10/a0`
+   localparam logic [4:0]  LoadBaseAddr   = (DmBaseAddress == 0) ? 5'd0 : 5'd10;
+diff --git a/src/dm_top.sv b/src/dm_top.sv
+index 799602f..e63aa17 100644
+--- a/src/dm_top.sv
++++ b/src/dm_top.sv
+@@ -20,6 +20,7 @@
+ module dm_top #(
+   parameter int unsigned        NrHarts          = 1,
+   parameter int unsigned        BusWidth         = 32,
++  parameter int unsigned        Xlen             = 32,
+   parameter int unsigned        DmBaseAddress    = 'h1000, // default to non-zero page
+   // Bitmask to select physically available harts for systems
+   // that don't use hart numbers in a contiguous fashion.
+@@ -206,6 +207,7 @@ module dm_top #(
+   dm_mem #(
+     .NrHarts(NrHarts),
+     .BusWidth(BusWidth),
++    .Xlen(Xlen),
+     .SelectableHarts(SelectableHarts),
+     .DmBaseAddress(DmBaseAddress)
+   ) i_dm_mem (
+-- 
+2.17.1
+

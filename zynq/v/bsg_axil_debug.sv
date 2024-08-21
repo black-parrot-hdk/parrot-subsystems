@@ -82,6 +82,7 @@ module bsg_axil_debug
      ,e_send_loreq
      ,e_lower_req
      ,e_unfreeze
+     ,e_drain
      } state_n, state_r;
   wire is_ready      = (state_r == e_ready);
   wire is_send_npc   = (state_r == e_send_npc);
@@ -89,6 +90,7 @@ module bsg_axil_debug
   wire is_send_loreq = (state_r == e_send_loreq);
   wire is_lower_req  = (state_r == e_lower_req);
   wire is_unfreeze   = (state_r == e_unfreeze);
+  wire is_drain      = (state_r == e_drain);
 
   hartinfo_t hartinfo;
   assign hartinfo = '{zero1      : '0
@@ -103,28 +105,28 @@ module bsg_axil_debug
   logic ndmreset_lo;
 
   logic slave_req_li, slave_we_li;
-  logic [bsg_width_p-1:0] slave_addr_li;
-  logic [bsg_width_p/8-1:0] slave_be_li;
-  logic [bsg_width_p-1:0] slave_wdata_li;
-  logic [bsg_width_p-1:0] slave_rdata_lo;
+  logic [bus_width_p-1:0] slave_addr_li;
+  logic [bus_width_p/8-1:0] slave_be_li;
+  logic [bus_width_p-1:0] slave_wdata_li;
+  logic [bus_width_p-1:0] slave_rdata_lo;
 
   logic master_req_lo, master_we_lo, master_gnt_li;
-  logic [bsg_width_p-1:0] master_add_lo;
-  logic [bsg_width_p-1:0] master_wdata_lo;
-  logic [bsg_width_p/8-1:0] master_be_lo;
+  logic [bus_width_p-1:0] master_add_lo;
+  logic [bus_width_p-1:0] master_wdata_lo;
+  logic [bus_width_p/8-1:0] master_be_lo;
 
   logic master_r_valid_li;
   logic master_r_err_li, master_r_other_err_li;
-  logic [bsg_width_p-1:0] master_r_rdata_li;
+  logic [bus_width_p-1:0] master_r_rdata_li;
 
   dmi_req_t dmi_req_li;
-  logic dmi_v_li, dmi_ready_lo;
+  logic dmi_req_v_li, dmi_req_ready_lo;
   dmi_resp_t dmi_resp_lo;
   logic dmi_resp_v_lo, dmi_resp_ready_li;
   dm_top
    #(.NrHarts(1)
      ,.BusWidth(bus_width_p)
-     ,.Xlen(dword_width_gp)
+     ,.Xlen(64)
      // Forces portable debug rom
      ,.DmBaseAddress(1)
      )
@@ -134,7 +136,7 @@ module bsg_axil_debug
      ,.next_dm_addr_i('0)
      ,.testmode_i(1'b0) // unused
      ,.ndmreset_o(ndmreset_lo) // unused, connect??
-     ,.ndmreset_i(ndmreset_lo) // unused, connect??
+     ,.ndmreset_ack_i(ndmreset_lo) // unused, connect??
      ,.dmactive_o() // unused, connect??
      ,.debug_req_o(debug_req)
      ,.unavailable_i('0) // unused
@@ -305,17 +307,19 @@ module bsg_axil_debug
 
       unique casez (state_r)
         e_ready:
-          m_fifo_v_li = master_req_lo;
-          m_fifo_w_li = master_we_lo;
-          m_fifo_wmask_li = master_be_lo;
-          m_fifo_data_li = master_wdata_lo;
-          m_fifo_addr_li = master_add_lo;
-          master_gnt_li = m_fifo_ready_and_lo & m_fifo_v_li;
+          begin
+            m_fifo_v_li = master_req_lo;
+            m_fifo_w_li = master_we_lo;
+            m_fifo_wmask_li = master_be_lo;
+            m_fifo_data_li = master_wdata_lo;
+            m_fifo_addr_li = master_add_lo;
+            master_gnt_li = m_fifo_ready_and_lo & m_fifo_v_li;
 
-          master_r_valid_li = m_fifo_v_lo;
-          master_r_rdata_li = m_fifo_data_lo;
+            master_r_valid_li = m_fifo_v_lo;
+            master_r_rdata_li = m_fifo_data_lo;
 
-          state_n = (debug_req & ~outstanding_r) ? e_send_npc : state_r;
+            state_n = (debug_req & ~outstanding_r) ? e_send_npc : state_r;
+          end
         e_send_npc:
           begin
             m_fifo_v_li = ~outstanding_r;

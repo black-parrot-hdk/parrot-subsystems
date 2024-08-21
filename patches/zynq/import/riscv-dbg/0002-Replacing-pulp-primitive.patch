@@ -1,0 +1,77 @@
+From 807059c9382059d52cfca567ad043bf114bdce48 Mon Sep 17 00:00:00 2001
+From: Dan Petrisko <petrisko@cs.washington.edu>
+Date: Wed, 21 Aug 2024 17:20:59 -0700
+Subject: [PATCH] Replacing pulp primitive
+
+---
+ src/dm_csrs.sv | 54 +++++++++++++++++++++++++++++++++-----------------
+ 1 file changed, 36 insertions(+), 18 deletions(-)
+
+diff --git a/src/dm_csrs.sv b/src/dm_csrs.sv
+index a945a70..739dff9 100644
+--- a/src/dm_csrs.sv
++++ b/src/dm_csrs.sv
+@@ -590,24 +590,42 @@ module dm_csrs #(
+   assign ndmreset_o = dmcontrol_q.ndmreset;
+ 
+   // response FIFO
+-  fifo_v2 #(
+-    .dtype            ( logic [$bits(dmi_resp_o)-1:0] ),
+-    .DEPTH            ( 2                             )
+-  ) i_fifo (
+-    .clk_i,
+-    .rst_ni,
+-    .flush_i          ( ~dmi_rst_ni          ), // Flush the queue if the DTM is
+-                                                // reset
+-    .testmode_i       ( testmode_i           ),
+-    .full_o           ( resp_queue_full      ),
+-    .empty_o          ( resp_queue_empty     ),
+-    .alm_full_o       (                      ),
+-    .alm_empty_o      (                      ),
+-    .data_i           ( resp_queue_inp       ),
+-    .push_i           ( resp_queue_push      ),
+-    .data_o           ( dmi_resp_o           ),
+-    .pop_i            ( resp_queue_pop       )
+-  );
++  //fifo_v2 #(
++  //  .dtype            ( logic [$bits(dmi_resp_o)-1:0] ),
++  //  .DEPTH            ( 2                             )
++  //) i_fifo (
++  //  .clk_i,
++  //  .rst_ni,
++  //  .flush_i          ( ~dmi_rst_ni          ), // Flush the queue if the DTM is
++  //                                              // reset
++  //  .testmode_i       ( testmode_i           ),
++  //  .full_o           ( resp_queue_full      ),
++  //  .empty_o          ( resp_queue_empty     ),
++  //  .alm_full_o       (                      ),
++  //  .alm_empty_o      (                      ),
++  //  .data_i           ( resp_queue_inp       ),
++  //  .push_i           ( resp_queue_push      ),
++  //  .data_o           ( dmi_resp_o           ),
++  //  .pop_i            ( resp_queue_pop       )
++  //);
++
++  logic resp_queue_ready_and_lo, resp_queue_v_lo;
++  bsg_two_fifo
++   #(.width_p($bits(dm::dmi_resp_t)))
++   i_fifo
++    (.clk_i(clk_i)
++     ,.reset_i(~rst_ni || ~dmi_rst_ni)
++
++     ,.data_i(resp_queue_inp)
++     ,.v_i(resp_queue_push)
++     ,.ready_param_o(resp_queue_ready_and_lo)
++
++     ,.data_o(dmi_resp_o)
++     ,.v_o(resp_queue_v_lo)
++     ,.yumi_i(resp_queue_pop)
++    );
++  assign resp_queue_full = ~resp_queue_ready_and_lo;
++  assign resp_queue_empty = ~resp_queue_v_lo;
+ 
+   always_ff @(posedge clk_i or negedge rst_ni) begin : p_regs
+     // PoR
+-- 
+2.17.1
+
