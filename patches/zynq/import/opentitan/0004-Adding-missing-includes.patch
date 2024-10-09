@@ -1,0 +1,25 @@
+From 83cce86acb569fd265199de58c1dfd8733f26222 Mon Sep 17 00:00:00 2001
+From: Dan Petrisko <petrisko@cs.washington.edu>
+Date: Thu, 10 Oct 2024 22:45:11 -0700
+Subject: [PATCH 4/4] Adding missing includes
+
+---
+ hw/ip_templates/rv_plic/rtl/rv_plic.sv.tpl | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/hw/ip_templates/rv_plic/rtl/rv_plic.sv.tpl b/hw/ip_templates/rv_plic/rtl/rv_plic.sv.tpl
+index f3508bd..ec894ff 100644
+--- a/hw/ip_templates/rv_plic/rtl/rv_plic.sv.tpl
++++ b/hw/ip_templates/rv_plic/rtl/rv_plic.sv.tpl
+@@ -14,6 +14,8 @@
+ // Verilog parameter
+ //   MAX_PRIO: Maximum value of interrupt priority
+ 
++`include "prim_assert.sv"
++
+ module ${module_instance_name} import ${module_instance_name}_reg_pkg::*; #(
+   parameter logic [NumAlerts-1:0] AlertAsyncOn  = {NumAlerts{1'b1}},
+   // OpenTitan IP standardizes on level triggered interrupts,
+-- 
+2.16.5
+
