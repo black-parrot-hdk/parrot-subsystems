@@ -38,7 +38,7 @@
  *
  */
 
-`include "bsg_defines.v"
+`include "bsg_defines.sv"
 
 module packet_buffer #(
       parameter `BSG_INV_PARAM(slot_p)

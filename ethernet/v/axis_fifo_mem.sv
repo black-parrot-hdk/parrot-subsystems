@@ -1,4 +1,4 @@
-`include "bsg_defines.v"
+`include "bsg_defines.sv"
 
 module axis_fifo_mem #(
     parameter `BSG_INV_PARAM(width_p)

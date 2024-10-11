@@ -32,7 +32,7 @@
  *
  */
 
-`include "bsg_defines.v"
+`include "bsg_defines.sv"
 
 
 module ethernet_control_unit #
