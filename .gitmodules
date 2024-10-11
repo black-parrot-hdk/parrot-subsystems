@@ -1,3 +1,8 @@
 [submodule "zynq/import/riscv-dbg"]
     path = zynq/import/riscv-dbg
     url = https://github.com/pulp-platform/riscv-dbg
+    branch = master
+[submodule "verilog-ethernet"]
+    path = ethernet/import/verilog-ethernet
+    url = https://github.com/alexforencich/verilog-ethernet
+    branch = master

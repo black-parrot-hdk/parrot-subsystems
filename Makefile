@@ -18,6 +18,7 @@ manycore_dir  ?= $(BP_SUB_DIR)/manycore
 openpiton_dir ?= $(BP_SUB_DIR)/openpiton
 wb_dir        ?= $(BP_SUB_DIR)/wb
 zynq_dir      ?= $(BP_SUB_DIR)/zynq
+ethernet_dir  ?= $(BP_SUB_DIR)/ethernet
 
 patch_tag ?= $(addprefix $(BP_SUB_TOUCH_DIR)/patch.,$(shell $(GIT) rev-parse HEAD))
 apply_patches: | $(patch_tag)
